@@ -27,6 +27,7 @@ import { toast } from 'sonner';
 
 interface CaseDetailsProps {
   caseData: CaseData;
+  onCaseUpdate?: (updatedCase: CaseData) => void;
 }
 
 const statusConfig = {
@@ -51,7 +52,7 @@ const formatINR = (amount: number) => {
   }).format(amount);
 };
 
-export function CaseDetails({ caseData }: CaseDetailsProps) {
+export function CaseDetails({ caseData, onCaseUpdate }: CaseDetailsProps) {
   const [processDialogOpen, setProcessDialogOpen] = useState(false);
   const [requestInfoDialogOpen, setRequestInfoDialogOpen] = useState(false);
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
@@ -62,6 +63,18 @@ export function CaseDetails({ caseData }: CaseDetailsProps) {
   const priority = priorityConfig[caseData.priority];
 
   const handleProcessClaim = (decision: string, amount: number, notes: string) => {
+    const updatedCase = { ...caseData };
+    if (decision === 'approve' || decision === 'reject') {
+      updatedCase.status = 'resolved';
+    } else if (decision === 'review') {
+      updatedCase.status = 'pending';
+    }
+    updatedCase.timeline.push({
+      event: decision === 'approve' ? `Claim approved for ${formatINR(amount)}` : decision === 'reject' ? 'Claim rejected' : 'Sent for further review',
+      date: new Date().toLocaleDateString(),
+      user: 'Current User'
+    });
+    onCaseUpdate?.(updatedCase);
     console.log('Processing claim:', { decision, amount, notes });
   };
 

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { CheckCircle2, AlertTriangle, FileCheck, IndianRupee } from 'lucide-react';
+import { CheckCircle2, AlertTriangle, FileCheck, IndianRupee, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -56,11 +56,11 @@ export function ProcessClaimDialog({ open, onOpenChange, caseData, onProcess }: 
     onProcess(decision, parseInt(approvedAmount), notes);
     
     toast.success(
-      decision === 'approve' 
-        ? `Claim ${caseData.claimNumber} approved for ${formatINR(parseInt(approvedAmount))}` 
+      decision === 'approve'
+        ? `Claim ${caseData.claimNumber} approved for ${formatINR(parseInt(approvedAmount))}`
         : decision === 'reject'
         ? `Claim ${caseData.claimNumber} has been rejected`
-        : `Claim ${caseData.claimNumber} sent for further review`
+        : `Claim ${caseData.claimNumber} marked as waiting`
     );
 
     setIsProcessing(false);
@@ -121,8 +121,8 @@ export function ProcessClaimDialog({ open, onOpenChange, caseData, onProcess }: 
                 </SelectItem>
                 <SelectItem value="review">
                   <div className="flex items-center gap-2">
-                    <FileCheck className="w-4 h-4 text-warning" />
-                    Send for Further Review
+                    <Clock className="w-4 h-4 text-warning" />
+                    Mark as Waiting
                   </div>
                 </SelectItem>
               </SelectContent>

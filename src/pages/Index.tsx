@@ -7,13 +7,16 @@ import { KnowledgePanel } from '@/components/KnowledgePanel';
 import { CustomerList } from '@/components/CustomerList';
 import { DashboardCharts } from '@/components/DashboardCharts';
 import { mockCases, mockPolicies, mockAlerts } from '@/data/mockData';
-import { CaseData } from '@/types/case';
+import { CaseData, GuardianAlert, AIDecision } from '@/types/case';
 
 const Index = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [activeView, setActiveView] = useState('cases');
   const [selectedCase, setSelectedCase] = useState<CaseData>(mockCases[0]);
+  const [guardianMode, setGuardianMode] = useState(false);
+  const [guardianAlerts, setGuardianAlerts] = useState<GuardianAlert[]>([]);
+  const [auditTrail, setAuditTrail] = useState<AIDecision[]>([]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -62,12 +65,18 @@ const Index = () => {
               selectedCaseId={selectedCase.id}
               onSelectCase={handleSelectCase}
             />
-            <CaseDetails caseData={selectedCase} />
-            <KnowledgePanel 
-              policies={mockPolicies} 
-              alerts={mockAlerts} 
+            <CaseDetails caseData={selectedCase} onCaseUpdate={setSelectedCase} />
+            <KnowledgePanel
+              policies={mockPolicies}
+              alerts={mockAlerts}
               caseData={selectedCase}
               isLoading={isLoading}
+              guardianAlerts={guardianAlerts}
+              onGuardianModeToggle={setGuardianMode}
+              guardianMode={guardianMode}
+              auditTrail={auditTrail}
+              onAuditTrailUpdate={setAuditTrail}
+              onGuardianAlertsUpdate={setGuardianAlerts}
             />
           </>
         );

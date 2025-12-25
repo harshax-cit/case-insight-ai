@@ -56,7 +56,7 @@ export const mockCases: CaseData[] = [
     claimType: 'Flood Insurance',
     jurisdiction: 'Maharashtra',
     caseStage: 'Initial Review',
-    status: 'in-review',
+    status: 'resolved',
     priority: 'high',
     applicant: {
       name: 'Rajesh Kumar',
@@ -87,6 +87,8 @@ export const mockCases: CaseData[] = [
       { date: '2024-11-18 09:25', event: 'Assigned to Claims Agent', user: 'Auto-Assignment' },
       { date: '2024-11-19 14:30', event: 'Supporting documents uploaded', user: 'Rajesh Kumar' },
       { date: '2024-11-20 10:15', event: 'Initial review started', user: 'Agent: Priya Mehta' },
+      { date: '2024-11-21 14:00', event: 'AI Analysis completed - Approved for ₹10,650,000', user: 'Enterprise Claims AI' },
+      { date: '2024-11-21 14:30', event: 'Claim resolved and payment processed', user: 'System' },
     ],
   },
   {

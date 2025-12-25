@@ -64,3 +64,45 @@ export interface ComplianceAlert {
   };
   actionRequired?: string;
 }
+
+export interface AIDecision {
+  id: string;
+  timestamp: Date;
+  query: string;
+  response: string;
+  reasoning: {
+    appliedRules: string[];
+    excludedRules: {
+      rule: string;
+      reason: string;
+    }[];
+    evidence: {
+      source: string;
+      relevance: number;
+      excerpt: string;
+    }[];
+  };
+  confidence: number;
+  caseContext: {
+    caseId: string;
+    claimType: string;
+    jurisdiction: string;
+  };
+}
+
+export interface GuardianAlert {
+  id: string;
+  timestamp: Date;
+  riskLevel: 'low' | 'medium' | 'high' | 'critical';
+  trigger: string;
+  description: string;
+  recommendedAction: string;
+  caseId: string;
+  autoResolved?: boolean;
+}
+
+export interface AIMode {
+  witness: boolean;
+  guardian: boolean;
+  whyNot: boolean;
+}

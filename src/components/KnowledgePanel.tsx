@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import { 
-  Sparkles, 
-  BookOpen, 
-  AlertTriangle, 
-  FileText, 
+import {
+  Sparkles,
+  BookOpen,
+  AlertTriangle,
+  FileText,
   ExternalLink,
   Shield,
   Clock,
@@ -11,9 +11,10 @@ import {
   Zap,
   RefreshCw,
   MessageSquare,
-  TrendingUp
+  TrendingUp,
+  Eye
 } from 'lucide-react';
-import { PolicyResult, ComplianceAlert, CaseData } from '@/types/case';
+import { PolicyResult, ComplianceAlert, CaseData, GuardianAlert, AIDecision } from '@/types/case';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -24,12 +25,20 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { AIChatbox } from '@/components/AIChatbox';
+import { AuditTrail } from '@/components/AuditTrail';
+import { cn } from '@/lib/utils';
 
 interface KnowledgePanelProps {
   policies: PolicyResult[];
   alerts: ComplianceAlert[];
   caseData: CaseData;
   isLoading?: boolean;
+  guardianAlerts?: GuardianAlert[];
+  onGuardianModeToggle?: (enabled: boolean) => void;
+  guardianMode?: boolean;
+  auditTrail?: AIDecision[];
+  onAuditTrailUpdate?: (decisions: AIDecision[]) => void;
+  onGuardianAlertsUpdate?: (alerts: GuardianAlert[]) => void;
 }
 
 const typeConfig = {
@@ -45,7 +54,7 @@ const severityConfig = {
   critical: { icon: AlertTriangle, variant: 'destructive' as const, color: 'border-destructive' },
 };
 
-export function KnowledgePanel({ policies, alerts, caseData, isLoading }: KnowledgePanelProps) {
+export function KnowledgePanel({ policies, alerts, caseData, isLoading, guardianAlerts = [], onGuardianModeToggle, guardianMode = false, auditTrail = [], onAuditTrailUpdate, onGuardianAlertsUpdate }: KnowledgePanelProps) {
   const [selectedCitation, setSelectedCitation] = useState<PolicyResult | null>(null);
   const [activeTab, setActiveTab] = useState('policies');
 
@@ -74,17 +83,17 @@ export function KnowledgePanel({ policies, alerts, caseData, isLoading }: Knowle
 
   return (
     <>
-      <div className="w-80 min-w-[300px] max-w-[380px] border-l border-border bg-card flex flex-col h-full flex-shrink-0">
+      <div className="w-88 min-w-[320px] max-w-[400px] border-l border-border bg-card flex flex-col h-full flex-shrink-0">
         {/* Panel Header */}
         <div className="p-4 border-b border-border bg-gradient-to-b from-primary/5 to-transparent">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center shadow-md">
-                <Sparkles className="w-4 h-4 text-primary-foreground" />
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center shadow-md">
+                <Sparkles className="w-5 h-5 text-primary-foreground" />
               </div>
               <div>
-                <h2 className="font-semibold text-sm">AI Knowledge Assistant</h2>
-                <p className="text-[11px] text-muted-foreground">Context-aware guidance</p>
+                <h2 className="font-semibold text-base">AI Knowledge Assistant</h2>
+                <p className="text-xs text-muted-foreground">Context-aware guidance</p>
               </div>
             </div>
             {isLoading ? (
@@ -131,14 +140,83 @@ export function KnowledgePanel({ policies, alerts, caseData, isLoading }: Knowle
           </div>
         )}
 
+        {/* Guardian Mode Toggle */}
+        {onGuardianModeToggle && (
+          <div className="mx-3 mt-3 p-3 rounded-xl bg-muted/50 border border-border/50">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Shield className="w-4 h-4 text-primary" />
+                <div>
+                  <p className="text-xs font-semibold">Silent Guardian Mode</p>
+                  <p className="text-[11px] text-muted-foreground">AI monitors for risks passively</p>
+                </div>
+              </div>
+              <button
+                onClick={() => onGuardianModeToggle(!guardianMode)}
+                className={cn(
+                  "relative inline-flex h-6 w-11 items-center rounded-full transition-colors",
+                  guardianMode ? "bg-primary" : "bg-muted-foreground/30"
+                )}
+              >
+                <span
+                  className={cn(
+                    "inline-block h-4 w-4 transform rounded-full bg-white transition-transform",
+                    guardianMode ? "translate-x-6" : "translate-x-1"
+                  )}
+                />
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Guardian Alerts */}
+        {guardianAlerts.length > 0 && (
+          <div className="mx-3 mt-3 space-y-2">
+            {guardianAlerts.slice(0, 3).map((alert) => (
+              <div
+                key={alert.id}
+                className={cn(
+                  "p-3 rounded-xl border",
+                  alert.riskLevel === 'critical' ? "bg-destructive/10 border-destructive/30" :
+                  alert.riskLevel === 'high' ? "bg-warning/10 border-warning/30" :
+                  "bg-info/10 border-info/30"
+                )}
+              >
+                <div className="flex items-start gap-2">
+                  <AlertTriangle className={cn(
+                    "w-4 h-4 mt-0.5 flex-shrink-0",
+                    alert.riskLevel === 'critical' ? "text-destructive" :
+                    alert.riskLevel === 'high' ? "text-warning" : "text-info"
+                  )} />
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <Badge variant={
+                        alert.riskLevel === 'critical' ? 'destructive' :
+                        alert.riskLevel === 'high' ? 'default' : 'secondary'
+                      } className="text-xs">
+                        {alert.riskLevel.toUpperCase()} RISK
+                      </Badge>
+                      <span className="text-xs text-muted-foreground">
+                        {alert.timestamp.toLocaleTimeString()}
+                      </span>
+                    </div>
+                    <p className="text-xs font-medium">{alert.description}</p>
+                    <p className="text-[11px] text-muted-foreground mt-1">{alert.recommendedAction}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col overflow-hidden">
-          <TabsList className="mx-3 mt-3 mb-2 h-9">
-            <TabsTrigger value="policies" className="flex-1 text-xs">
+          <TabsList className="mx-3 mt-3 mb-2 h-9 grid grid-cols-4">
+            <TabsTrigger value="policies" className="text-xs">
               <BookOpen className="w-3.5 h-3.5 mr-1.5" />
               Policies
             </TabsTrigger>
-            <TabsTrigger value="alerts" className="flex-1 relative text-xs">
+            <TabsTrigger value="alerts" className="relative text-xs">
               <AlertTriangle className="w-3.5 h-3.5 mr-1.5" />
               Alerts
               {filteredAlerts.length > 0 && (
@@ -147,9 +225,13 @@ export function KnowledgePanel({ policies, alerts, caseData, isLoading }: Knowle
                 </span>
               )}
             </TabsTrigger>
-            <TabsTrigger value="chat" className="flex-1 text-xs">
+            <TabsTrigger value="chat" className="text-xs">
               <MessageSquare className="w-3.5 h-3.5 mr-1.5" />
               AI Chat
+            </TabsTrigger>
+            <TabsTrigger value="audit" className="text-xs">
+              <Eye className="w-3.5 h-3.5 mr-1.5" />
+              Audit
             </TabsTrigger>
           </TabsList>
 
@@ -283,7 +365,17 @@ export function KnowledgePanel({ policies, alerts, caseData, isLoading }: Knowle
           </TabsContent>
 
           <TabsContent value="chat" className="flex-1 overflow-hidden mt-0">
-            <AIChatbox />
+            <AIChatbox
+              auditTrail={auditTrail}
+              onAuditTrailUpdate={onAuditTrailUpdate}
+              guardianAlerts={guardianAlerts}
+              onGuardianAlertsUpdate={onGuardianAlertsUpdate}
+              guardianMode={guardianMode}
+            />
+          </TabsContent>
+
+          <TabsContent value="audit" className="flex-1 overflow-hidden mt-0 px-3 pb-3">
+            <AuditTrail decisions={auditTrail} />
           </TabsContent>
         </Tabs>
 
