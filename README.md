@@ -55,3 +55,48 @@ AI remains unobtrusive during normal cases and activates only when:
 
 ## 🏗️ System Architecture (High Level)
 
+---
+
+## 🖥️ Frontend
+
+The frontend represents the **decision experience layer** for agents and reviewers.
+
+### Responsibilities
+- Display case context
+- Trigger AI evaluations
+- Visualize decision, confidence, and reasoning
+- Surface “why-not” explanations
+- Show risk and SLA indicators
+
+### Tech Stack
+- React  
+- TypeScript  
+- Vite  
+- Tailwind CSS  
+
+The UI is intentionally minimal and enterprise-grade, aligned with Appian’s design philosophy.
+
+---
+
+## 🔧 Backend
+
+The backend represents the **decision intelligence layer**.
+
+### Responsibilities
+- Evaluate claims using AI logic
+- Simulate RAG-style policy retrieval
+- Return explainable decision outputs
+- Provide confidence scores
+- Log decision context for audit readiness
+
+### Tech Stack
+- Python  
+- Flask  
+
+---
+
+## 🔌 Backend APIs
+
+### Health Check
+
+
